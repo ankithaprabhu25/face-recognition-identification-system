@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>AI Face Recognition</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+
+<body>
+
+
+<div class="page">
+
+
+    <!-- ================================================= -->
+    <!-- NAVBAR -->
+    <!-- ================================================= -->
+
+    <nav class="navbar">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                ◉
+            </div>
+
+            <div>
+
+                <h2>
+                    Face<span>AI</span>
+                </h2>
+
+                <small>
+                    Recognition System
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="status">
+
+            <span class="status-dot"></span>
+
+            System Ready
+
+        </div>
+
+    </nav>
+
+
+
+    <!-- ================================================= -->
+    <!-- HERO -->
+    <!-- ================================================= -->
+
+    <section class="hero">
+
+        <div class="hero-text">
+
+            <div class="badge">
+                AI / ML PROJECT
+            </div>
+
+
+            <h1>
+
+                Face Recognition
+
+                <span>
+                    Identification
+                </span>
+
+            </h1>
+
+
+            <p>
+
+                Enroll individuals and identify faces using
+                AI-powered face detection, embeddings and
+                similarity matching.
+
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ================================================= -->
+    <!-- CAMERA SECTION -->
+    <!-- ================================================= -->
+
+    <section class="camera-section">
+
+
+        <div class="section-title">
+
+            <div>
+
+                <h2>
+                    Live Camera
+                </h2>
+
+                <p>
+                    Position your face inside the camera frame.
+                </p>
+
+            </div>
+
+
+            <div class="camera-status">
+
+                ● CAMERA
+
+            </div>
+
+        </div>
+
+
+
+        <div class="camera-wrapper">
+
+
+            <!-- CAMERA -->
+
+            <div class="camera-box">
+
+                <video
+                    id="video"
+                    autoplay
+                    playsinline>
+                </video>
+
+
+                <div class="camera-overlay">
+
+                    <div class="corner top-left"></div>
+
+                    <div class="corner top-right"></div>
+
+                    <div class="corner bottom-left"></div>
+
+                    <div class="corner bottom-right"></div>
+
+                </div>
+
+
+                <div class="camera-label">
+
+                    LIVE
+
+                </div>
+
+            </div>
+
+
+
+            <!-- CAMERA CONTROLS -->
+
+            <div class="capture-panel">
+
+
+                <h3>
+                    Camera Controls
+                </h3>
+
+
+                <p id="cameraMessage">
+
+                    Camera is not started.
+
+                </p>
+
+
+
+                <div class="camera-buttons">
+
+
+                    <button
+                        type="button"
+                        class="btn primary"
+                        onclick="startCamera()">
+
+                        ▶ Start Camera
+
+                    </button>
+
+
+
+                    <button
+                        type="button"
+                        class="btn capture"
+                        onclick="captureImage()">
+
+                        ● Capture Face
+
+                    </button>
+
+
+
+                    <button
+                        type="button"
+                        class="btn secondary"
+                        onclick="stopCamera()">
+
+                        ■ Stop Camera
+
+                    </button>
+
+
+                </div>
+
+
+
+                <!-- CAPTURED IMAGE -->
+
+                <div class="preview-container">
+
+
+                    <h4>
+                        Captured Image
+                    </h4>
+
+
+                    <img
+                        id="preview"
+                        src="{% if captured_image is defined and captured_image %}{{ captured_image }}{% endif %}"
+                        alt="Captured face"
+                        {% if captured_image is defined and captured_image %}
+                        style="display:block;"
+                        {% endif %}>
+
+
+                    <span
+                        id="previewText"
+                        {% if captured_image is defined and captured_image %}
+                        style="display:none;"
+                        {% endif %}>
+
+                        No image captured
+
+                    </span>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ================================================= -->
+    <!-- ACTION CARDS -->
+    <!-- ================================================= -->
+
+    <section class="actions">
+
+
+        <!-- ENROLL -->
+
+        <div class="action-card">
+
+
+            <div class="action-icon enroll-icon">
+
+                +
+
+            </div>
+
+
+
+            <div class="action-content">
+
+
+                <h2>
+                    Enroll Person
+                </h2>
+
+
+                <p>
+                    Add a person's face to the recognition
+                    database.
+                </p>
+
+
+
+                <form
+                    action="/enroll"
+                    method="POST">
+
+
+                    <label>
+                        Person Name
+                    </label>
+
+
+                    <input
+                        type="text"
+                        name="name"
+                        placeholder="Enter person's name"
+                        required>
+
+
+
+                    <!--
+                        IMPORTANT:
+                        Keep the captured image after
+                        the Flask page reloads.
+                    -->
+
+                    <input
+                        type="hidden"
+                        id="enroll_image"
+                        name="image"
+                        value="{% if captured_image is defined %}{{ captured_image }}{% endif %}">
+
+
+
+                    <button
+                        type="submit"
+                        class="action-button">
+
+                        Enroll Captured Face
+
+                    </button>
+
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- RECOGNIZE -->
+
+        <div class="action-card">
+
+
+            <div class="action-icon recognize-icon">
+
+                ◉
+
+            </div>
+
+
+
+            <div class="action-content">
+
+
+                <h2>
+                    Recognize Face
+                </h2>
+
+
+                <p>
+                    Compare a captured face with enrolled
+                    individuals.
+                </p>
+
+
+
+                <form
+                    action="/recognize"
+                    method="POST">
+
+
+                    <!--
+                        IMPORTANT:
+                        Keep captured image available
+                        after result page loads.
+                    -->
+
+                    <input
+                        type="hidden"
+                        id="recognize_image"
+                        name="image"
+                        value="{% if captured_image is defined %}{{ captured_image }}{% endif %}">
+
+
+
+                    <button
+                        type="submit"
+                        class="action-button recognize-button">
+
+                        Recognize Captured Face
+
+                    </button>
+
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ================================================= -->
+    <!-- RESULT -->
+    <!-- ================================================= -->
+
+    {% if message is defined %}
+
+
+    <section class="result-section">
+
+
+        <div class="result-header">
+
+
+            <span class="result-icon">
+
+                ✓
+
+            </span>
+
+
+            <div>
+
+                <h2>
+                    Recognition Result
+                </h2>
+
+
+                <p>
+                    AI analysis completed
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+
+        <div class="result-content">
+
+
+            <!-- STATUS -->
+
+            <div class="result-status">
+
+
+                {% if name == "Unknown" %}
+
+
+                    <span class="unknown">
+
+                        UNKNOWN FACE
+
+                    </span>
+
+
+                {% elif name %}
+
+
+                    <span class="matched">
+
+                        MATCH FOUND
+
+                    </span>
+
+
+                {% else %}
+
+
+                    <span class="info">
+
+                        INFORMATION
+
+                    </span>
+
+
+                {% endif %}
+
+
+            </div>
+
+
+
+            <!-- DETAILS -->
+
+            <div class="result-details">
+
+
+                <div class="detail">
+
+                    <small>
+                        MESSAGE
+                    </small>
+
+
+                    <strong>
+
+                        {{ message }}
+
+                    </strong>
+
+                </div>
+
+
+
+                {% if name is defined and name is not none %}
+
+
+                <div class="detail">
+
+                    <small>
+                        IDENTIFIED PERSON
+                    </small>
+
+
+                    <strong>
+
+                        {{ name }}
+
+                    </strong>
+
+                </div>
+
+
+                {% endif %}
+
+
+
+                {% if score is defined and score is not none %}
+
+
+                <div class="detail">
+
+                    <small>
+                        SIMILARITY SCORE
+                    </small>
+
+
+                    <strong>
+
+                        {{ "%.4f"|format(score) }}
+
+                    </strong>
+
+                </div>
+
+
+                {% endif %}
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    {% endif %}
+
+
+
+    <!-- ================================================= -->
+    <!-- TECHNOLOGY -->
+    <!-- ================================================= -->
+
+    <section class="technology">
+
+
+        <h2>
+            Technology Stack
+        </h2>
+
+
+
+        <div class="tech-grid">
+
+
+            <div class="tech">
+
+                <strong>
+                    YuNet
+                </strong>
+
+                <span>
+                    Face Detection
+                </span>
+
+            </div>
+
+
+
+            <div class="tech">
+
+                <strong>
+                    SFace
+                </strong>
+
+                <span>
+                    Face Embeddings
+                </span>
+
+            </div>
+
+
+
+            <div class="tech">
+
+                <strong>
+                    OpenCV
+                </strong>
+
+                <span>
+                    Computer Vision
+                </span>
+
+            </div>
+
+
+
+            <div class="tech">
+
+                <strong>
+                    Flask
+                </strong>
+
+                <span>
+                    Web Application
+                </span>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ================================================= -->
+    <!-- FOOTER -->
+    <!-- ================================================= -->
+
+    <footer>
+
+        <p>
+            AI Face Recognition Identification System
+        </p>
+
+        <span>
+            YuNet • SFace • OpenCV • Flask
+        </span>
+
+    </footer>
+
+
+</div>
+
+
+
+<!-- ================================================= -->
+<!-- HIDDEN CANVAS -->
+<!-- ================================================= -->
+
+<canvas
+    id="canvas"
+    style="display:none;">
+</canvas>
+
+
+
+<!-- ================================================= -->
+<!-- JAVASCRIPT -->
+<!-- ================================================= -->
+
+<script>
+
+
+let video =
+    document.getElementById("video");
+
+
+let canvas =
+    document.getElementById("canvas");
+
+
+let preview =
+    document.getElementById("preview");
+
+
+let previewText =
+    document.getElementById("previewText");
+
+
+let stream = null;
+
+
+
+// =====================================================
+// START CAMERA
+// =====================================================
+
+async function startCamera() {
+
+    try {
+
+
+        // Stop old camera if already running
+
+        if (stream) {
+
+            stream.getTracks().forEach(
+                function(track) {
+
+                    track.stop();
+
+                }
+            );
+
+        }
+
+
+
+        // Request webcam
+
+        stream =
+            await navigator.mediaDevices.getUserMedia({
+
+                video: {
+
+                    width: {
+                        ideal: 640
+                    },
+
+                    height: {
+                        ideal: 480
+                    }
+
+                },
+
+                audio: false
+
+            });
+
+
+
+        video.srcObject =
+            stream;
+
+
+        await video.play();
+
+
+
+        document.getElementById(
+            "cameraMessage"
+        ).innerText =
+            "Camera ready. Position your face inside the frame.";
+
+
+    }
+
+    catch (error) {
+
+
+        console.error(error);
+
+
+        document.getElementById(
+            "cameraMessage"
+        ).innerText =
+            "Camera access failed. Please allow camera permission.";
+
+
+    }
+
+}
+
+
+
+// =====================================================
+// CAPTURE IMAGE
+// =====================================================
+
+function captureImage() {
+
+
+    // Check camera
+
+    if (!stream) {
+
+        document.getElementById(
+            "cameraMessage"
+        ).innerText =
+            "Please start the camera first.";
+
+        return;
+
+    }
+
+
+
+    // Check video
+
+    if (
+        video.videoWidth === 0 ||
+        video.videoHeight === 0
+    ) {
+
+        document.getElementById(
+            "cameraMessage"
+        ).innerText =
+            "Camera is loading. Please wait.";
+
+        return;
+
+    }
+
+
+
+    // Set canvas size
+
+    canvas.width =
+        video.videoWidth;
+
+    canvas.height =
+        video.videoHeight;
+
+
+
+    // Draw current video frame
+
+    let context =
+        canvas.getContext("2d");
+
+
+    context.drawImage(
+
+        video,
+
+        0,
+
+        0,
+
+        canvas.width,
+
+        canvas.height
+
+    );
+
+
+
+    // Convert to Base64
+
+    let capturedImage =
+        canvas.toDataURL(
+            "image/jpeg",
+            0.95
+        );
+
+
+
+    // Put image into both forms
+
+    document.getElementById(
+        "enroll_image"
+    ).value =
+        capturedImage;
+
+
+    document.getElementById(
+        "recognize_image"
+    ).value =
+        capturedImage;
+
+
+
+    // Show preview
+
+    preview.src =
+        capturedImage;
+
+
+    preview.style.display =
+        "block";
+
+
+    previewText.style.display =
+        "none";
+
+
+
+    // Status message
+
+    document.getElementById(
+        "cameraMessage"
+    ).innerText =
+        "✓ Face captured successfully.";
+
+
+}
+
+
+
+// =====================================================
+// STOP CAMERA
+// =====================================================
+
+function stopCamera() {
+
+
+    if (stream) {
+
+
+        stream.getTracks().forEach(
+            function(track) {
+
+                track.stop();
+
+            }
+        );
+
+
+        video.srcObject =
+            null;
+
+
+        stream =
+            null;
+
+
+        document.getElementById(
+            "cameraMessage"
+        ).innerText =
+            "Camera stopped.";
+
+
+    }
+
+}
+
+
+// =====================================================
+// AUTO START CAMERA
+// =====================================================
+
+window.addEventListener(
+    "load",
+    function() {
+
+        startCamera();
+
+    }
+);
+
+
+</script>
+
+
+</body>
+
+</html>

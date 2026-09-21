@@ -1,98 +1,170 @@
+import base64
+
 import cv2
+import numpy as np
+
+from flask import Flask, render_template, request
 
 from src.enrollment import enroll_person
 from src.recognition import recognize_face
 
 
-def capture_from_webcam():
-    camera = cv2.VideoCapture(0)
+app = Flask(__name__)
 
-    if not camera.isOpened():
-        print("Error: Could not open webcam.")
+
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+
+def decode_webcam_image(image_data):
+    """
+    Convert the Base64 webcam image from the browser
+    into an OpenCV image.
+    """
+
+    if not image_data:
         return None
 
-    print("Webcam opened.")
-    print("Press SPACE to capture your face.")
-    print("Press ESC to cancel.")
+    try:
 
-    captured_image = None
+        # Remove the data:image/jpeg;base64, part
+        if "," in image_data:
+            image_data = image_data.split(",", 1)[1]
 
-    while True:
-        ret, frame = camera.read()
+        # Decode Base64
+        image_bytes = base64.b64decode(image_data)
 
-        if not ret:
-            print("Error: Could not read webcam.")
-            break
+        # Convert bytes to NumPy array
+        image_array = np.frombuffer(
+            image_bytes,
+            dtype=np.uint8
+        )
 
-        cv2.imshow("Face Recognition - Webcam", frame)
+        # Convert to OpenCV image
+        image = cv2.imdecode(
+            image_array,
+            cv2.IMREAD_COLOR
+        )
 
-        key = cv2.waitKey(1) & 0xFF
+        return image
 
-        if key == 32:  # SPACE
-            captured_image = frame.copy()
-            break
+    except Exception as error:
 
-        if key == 27:  # ESC
-            break
+        print("Image decoding error:", error)
 
-    camera.release()
-    cv2.destroyAllWindows()
-
-    return captured_image
+        return None
 
 
-def enroll_from_webcam():
-    name = input("Enter person's name: ").strip()
+# =========================================================
+# ENROLL
+# =========================================================
 
+@app.route("/enroll", methods=["POST"])
+def enroll():
+
+    name = request.form.get("name", "").strip()
+
+    image_data = request.form.get("image", "")
+
+
+    # Name missing
     if not name:
-        print("Name cannot be empty.")
-        return
 
-    image = capture_from_webcam()
+        return render_template(
+            "index.html",
+            message="Please enter a person's name.",
+            captured_image=image_data
+        )
+
+
+    # Image missing
+    if not image_data:
+
+        return render_template(
+            "index.html",
+            message="Please capture a face using the webcam first."
+        )
+
+
+    # Decode image
+    image = decode_webcam_image(image_data)
+
 
     if image is None:
-        return
 
-    success, message = enroll_person(name, image)
-    print(message)
+        return render_template(
+            "index.html",
+            message="Could not process the captured image.",
+            captured_image=image_data
+        )
 
 
-def recognize_from_webcam():
-    image = capture_from_webcam()
+    # Enroll face
+    success, message = enroll_person(
+        name,
+        image
+    )
+
+
+    # Return page with captured image
+    return render_template(
+        "index.html",
+        message=message,
+        captured_image=image_data
+    )
+
+
+# =========================================================
+# RECOGNIZE
+# =========================================================
+
+@app.route("/recognize", methods=["POST"])
+def recognize():
+
+    image_data = request.form.get("image", "")
+
+
+    # Image missing
+    if not image_data:
+
+        return render_template(
+            "index.html",
+            message="Please capture a face using the webcam first."
+        )
+
+
+    # Decode image
+    image = decode_webcam_image(image_data)
+
 
     if image is None:
-        return
 
+        return render_template(
+            "index.html",
+            message="Could not process the captured image.",
+            captured_image=image_data
+        )
+
+
+    # Recognize face
     name, score, message = recognize_face(image)
 
-    print("\n===== Recognition Result =====")
-    print(f"Name: {name}")
-    print(f"Similarity score: {score:.4f}")
-    print(f"Status: {message}")
+
+    # Return result + captured image
+    return render_template(
+        "index.html",
+        message=message,
+        name=name,
+        score=score,
+        captured_image=image_data
+    )
 
 
-def main():
-    while True:
-        print("\n===== Face Recognition Identification System =====")
-        print("1. Enroll person using webcam")
-        print("2. Recognize face using webcam")
-        print("3. Exit")
-
-        choice = input("\nEnter your choice: ").strip()
-
-        if choice == "1":
-            enroll_from_webcam()
-
-        elif choice == "2":
-            recognize_from_webcam()
-
-        elif choice == "3":
-            print("Exiting...")
-            break
-
-        else:
-            print("Invalid choice. Please enter 1, 2, or 3.")
-
+# =========================================================
+# RUN APPLICATION
+# =========================================================
 
 if __name__ == "__main__":
-    main()
+
+    app.run(debug=True)
