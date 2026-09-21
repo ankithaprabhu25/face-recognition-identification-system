@@ -110,19 +110,23 @@ The biometric database is not included in the public GitHub repository.
 
 A person can be enrolled by entering their name and capturing their face through the webcam.
 
-![Person Enrollment](screenshots/enrollment.png)
+   <img width="1206" height="954" alt="Screenshot 2026-09-21 151631" src="https://github.com/user-attachments/assets/17d8c54d-d276-403e-85f9-15c588070838" />
+
+
 
 ### 2. Known Person Recognition
 
 After enrollment, the system recognizes the person and displays the identity with the similarity score.
 
-![Known Person Recognition](screenshots/recognition.png)
+   <img width="1094" height="882" alt="Screenshot 2026-09-21 151712" src="https://github.com/user-attachments/assets/1360f178-e542-46ae-b3bd-2ebb068183cf" />
+
 
 ### 3. Unknown Person Rejection
 
 When a person who is not enrolled is detected, the system displays "Unknown" because the similarity score is below the threshold.
 
-![Unknown Person Rejection](screenshots/unknown.png)
+   <img width="498" height="759" alt="Screenshot 2026-09-21 151820" src="https://github.com/user-attachments/assets/bb4c9f5f-59a3-411a-8914-68f4029a6123" />
+
 
 ## Project Structure
 
@@ -218,20 +222,6 @@ The system can be tested using known and unknown faces.
 4. Capture the face.
 5. Click "Recognize Captured Face".
 6. The system should display "Unknown" when the similarity score is below the threshold.
-
-### Evaluation Dataset
-
-1. Enrollment Process
-   
-   <img width="1206" height="954" alt="Screenshot 2026-09-21 151631" src="https://github.com/user-attachments/assets/17d8c54d-d276-403e-85f9-15c588070838" />
-
-3. Identifying Enrolled Person
-   
-   <img width="1094" height="882" alt="Screenshot 2026-09-21 151712" src="https://github.com/user-attachments/assets/1360f178-e542-46ae-b3bd-2ebb068183cf" />
-
-4. Detection of Unknown Person
-   
-   <img width="498" height="759" alt="Screenshot 2026-09-21 151820" src="https://github.com/user-attachments/assets/bb4c9f5f-59a3-411a-8914-68f4029a6123" />
 
 ### Evaluation Results
 
