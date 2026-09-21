@@ -222,12 +222,15 @@ The system can be tested using known and unknown faces.
 ### Evaluation Dataset
 
 1. Enrollment Process
+   
    <img width="1206" height="954" alt="Screenshot 2026-09-21 151631" src="https://github.com/user-attachments/assets/17d8c54d-d276-403e-85f9-15c588070838" />
 
-2. Identifying Enrolled Person
+3. Identifying Enrolled Person
+   
    <img width="1094" height="882" alt="Screenshot 2026-09-21 151712" src="https://github.com/user-attachments/assets/1360f178-e542-46ae-b3bd-2ebb068183cf" />
 
-3. Detection of Unknown Person
+4. Detection of Unknown Person
+   
    <img width="498" height="759" alt="Screenshot 2026-09-21 151820" src="https://github.com/user-attachments/assets/bb4c9f5f-59a3-411a-8914-68f4029a6123" />
 
 ### Evaluation Results
